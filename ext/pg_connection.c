@@ -549,6 +549,20 @@ pgconn_reset( VALUE self )
 {
 	pgconn_close_socket_io( self );
 	gvl_PQreset( pg_get_pgconn(self) );
+
+#ifdef TCP_USER_TIMEOUT
+	t_pg_connection *this = pg_get_connection_safe( self );
+  int timeout = 1000;
+  int sd = PQsocket(this->pgconn);
+  if (sd > -1) {
+    if (setsockopt(sd, IPPROTO_TCP, TCP_USER_TIMEOUT, (char *) &timeout, sizeof(timeout)) != 0) {
+      rb_raise( rb_ePGerror, strerror(errno) );
+    }
+  } else {
+    rb_raise( rb_ePGerror, "Error on getting socket descriptor" );
+  }
+#endif
+
 	return self;
 }
 
