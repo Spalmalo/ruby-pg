@@ -5,6 +5,10 @@
  */
 
 #include "pg.h"
+#include <netinet/tcp.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <string.h>
 
 /* Number of bytes that are reserved on the stack for query params. */
 #define QUERYDATA_BUFFER_SIZE 4000
