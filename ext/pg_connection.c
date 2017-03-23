@@ -288,6 +288,19 @@ pgconn_init(int argc, VALUE *argv, VALUE self)
 	if (rb_block_given_p()) {
 		return rb_ensure(rb_yield, self, pgconn_finish, self);
 	}
+
+#ifdef TCP_USER_TIMEOUT
+  int timeout = 1000;
+  int sd = PQsocket(this->pgconn);
+  if (sd > -1) {
+    if (setsockopt(sd, IPPROTO_TCP, TCP_USER_TIMEOUT, (char *) &timeout, sizeof(timeout)) != 0) {
+      rb_raise( rb_ePGerror, strerror(errno) );
+    }
+  } else {
+    rb_raise( rb_ePGerror, "Error on getting socket descriptor" );
+  }
+#endif
+
 	return self;
 }
 
